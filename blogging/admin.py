@@ -1,6 +1,6 @@
 from django.contrib import admin
 
 # Register your models here.
-from polling.models import Poll
+from blogging.models import Post
 
-admin.site.register(Poll)
+admin.site.register(Post)
