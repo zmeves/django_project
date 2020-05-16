@@ -1,4 +1,6 @@
 from django.test import TestCase
+import datetime
+from django.utils.timezone import utc
 
 # Create your tests here.
 from django.test import TestCase
@@ -18,6 +20,7 @@ class PostTestCase(TestCase):
         actual = str(p1)
         self.assertEqual(expected, actual)
 
+
 class CategoryTestCsae(TestCase):
 
     def test_str_rep(self):
@@ -25,3 +28,34 @@ class CategoryTestCsae(TestCase):
         c1 = Category(name=expected)
         actual = str(c1)
         self.assertEqual(expected, actual)
+
+
+class FrontEndTestCase(TestCase):
+    """Tests views provided in front end"""
+
+    fixtures = ['blogging_test_fixture.json', ]
+
+    def setUp(self):
+        self.now = datetime.datetime.utcnow().replace(tzinfo=utc)
+        self.timedelta = datetime.timedelta(15)
+        author = User.objects.get(pk=1)
+        for count in range(1, 11):
+            post = Post(title="Post %d Title" % count,
+                text='foo',
+                author=author)
+            if count < 6:
+                pubdate = self.now - self.timedelta * count
+                post.published_date = pubdate
+            post.save()
+
+    def test_list_only_pub(self):
+        resp = self.client.get('/')
+        # the content of the rendered response is always a bytestring
+        resp_text = resp.content.decode(resp.charset)
+        self.assertTrue("Recent Posts" in resp_text)
+        for count in range(1, 11):
+            title = "Post %d Title" % count
+            if count < 6:
+                self.assertContains(resp, title, count=1)
+            else:
+                self.assertNotContains(resp, title)
