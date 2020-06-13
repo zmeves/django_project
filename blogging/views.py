@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.template import loader
+from django.utils import timezone
 from blogging.models import Post
 from blogging.forms import PostForm
 # Create your views here.
@@ -45,8 +46,9 @@ def add_model(request):
         if form.is_valid():
             model_instance = form.save(commit=False)
             # model_instance.timestamp = timezone.now()
+            model_instance.published_date = timezone.now()
             model_instance.save()
             return redirect('/')
     else:
         form = PostForm()
-        return render(request, "post_form.html", {'form': form})
+        return render(request, "blogging/post_form.html", {'form': form})
