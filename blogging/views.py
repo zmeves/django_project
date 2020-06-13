@@ -1,10 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template import loader
 from blogging.models import Post
-
+from blogging.forms import PostForm
 # Create your views here.
 
 from django.http import HttpResponse, HttpResponseRedirect, Http404
+
 
 def stub_view(request, *args, **kwargs):
     body = "Stub View\n\n"
@@ -16,6 +17,7 @@ def stub_view(request, *args, **kwargs):
         body += "\n".join(["\t%s: %s" % i for i in kwargs.items()])
     return HttpResponse(body, content_type='text/plain')
 
+
 def list_view(request):
     published = Post.objects.exclude(published_date__exact=None)
     posts = published.order_by('-published_date')
@@ -25,6 +27,7 @@ def list_view(request):
     # body = template.render(context)
     # return HttpResponse(body, content_type="text/html")
 
+
 def detail_view(request, post_id):
     published = Post.objects.exclude(published_date__exact=None)
     try:
@@ -33,3 +36,17 @@ def detail_view(request, post_id):
         raise Http404
     context = {'post': post}
     return render(request, 'blogging/detail.html', context)
+
+
+def add_model(request):
+
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            model_instance = form.save(commit=False)
+            # model_instance.timestamp = timezone.now()
+            model_instance.save()
+            return redirect('/')
+    else:
+        form = PostForm()
+        return render(request, "post_form.html", {'form': form})
