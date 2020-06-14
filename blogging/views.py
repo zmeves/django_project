@@ -3,6 +3,9 @@ from django.template import loader
 from django.utils import timezone
 from blogging.models import Post
 from blogging.forms import PostForm
+
+from django.contrib.syndication.views import Feed
+from django.urls import reverse
 # Create your views here.
 
 from django.http import HttpResponse, HttpResponseRedirect, Http404
@@ -52,3 +55,6 @@ def add_model(request):
     else:
         form = PostForm()
         return render(request, "blogging/post_form.html", {'form': form})
+
+
+
